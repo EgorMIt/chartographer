@@ -6,6 +6,8 @@ import com.example.charta.model.FragmentDto;
 import com.example.charta.model.ImageDto;
 import com.example.charta.service.ChartaService;
 import com.example.charta.utils.FileUtils;
+import com.example.charta.utils.GlobalRestrictions;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.awt.image.BufferedImage;
 @Service
 @Slf4j
 @ConfigurationPropertiesScan("com.example.charta.utils")
+@RequiredArgsConstructor
 public class ChartaServiceImpl implements ChartaService {
 
     /**
@@ -29,6 +32,8 @@ public class ChartaServiceImpl implements ChartaService {
     private static final FileUtils fu = new FileUtils();
     private static int idCount = 1;
     private static final String DEFAULT_NAME = "Image";
+
+    private final GlobalRestrictions globalRestrictions;
 
     /**
      * Создание нового пустого изображения
@@ -40,7 +45,8 @@ public class ChartaServiceImpl implements ChartaService {
      */
     @Override
     public ImageDto createNewImage(int width, int height) {
-        if (width <= 20000 && height <= 50000) {
+        if (width <= Integer.parseInt(globalRestrictions.getImageWidthMax())
+                && height <= Integer.parseInt(globalRestrictions.getImageHeightMax())) {
             BufferedImage newBufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
 
             Graphics2D g2d = (Graphics2D) newBufferedImage.getGraphics();
