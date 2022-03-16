@@ -2,6 +2,11 @@ package com.example.charta.errors;
 
 import lombok.Getter;
 
+/**
+ * Ошибка Not Found
+ *
+ * @author Egor Mitrofanov
+ */
 @Getter
 public class NotFoundException extends RuntimeException {
 

@@ -2,8 +2,11 @@ package com.example.charta.model;
 
 import lombok.*;
 
-import java.net.URI;
-
+/**
+ * Модель для работы с изображениями
+ *
+ * @author Egor Mitrofanov
+ */
 @Getter
 @Setter
 public class ImageDto extends Params {

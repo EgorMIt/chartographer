@@ -9,9 +9,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+/**
+ * Обработчик ошибок
+ *
+ * @author Egor Mitrofanov
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+    /**
+     * Обработка исключений при обращении к несуществующему файлу
+     *
+     * @param ex исключение.
+     * @return {@link NotFoundException}
+     */
     @ResponseBody
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFoundException.class)
@@ -19,6 +30,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ex.getError();
     }
 
+    /**
+     * Обработка исключений при невалидных параметрах запроса
+     *
+     * @param ex исключение.
+     * @return {@link BadRequestException}
+     */
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BadRequestException.class)

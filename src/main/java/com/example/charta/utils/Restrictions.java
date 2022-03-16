@@ -3,6 +3,11 @@ package com.example.charta.utils;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/**
+ * POJO класс для глобальных переменных
+ *
+ * @author Egor Mitrofanov
+ */
 @Data
 @ConfigurationProperties(prefix = "restrictions")
 public class Restrictions {
