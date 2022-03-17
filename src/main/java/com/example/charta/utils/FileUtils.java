@@ -25,8 +25,10 @@ public class FileUtils {
      * @return file нового изображения
      */
     public File getImageByID(int id) {
-        URI existingPath = URI.create(DEFAULT_NAME + id + EXTENSION);
-        return new File(REPOSITORY + existingPath);
+        if (checkImageInStorage(id)) {
+            URI existingPath = URI.create(DEFAULT_NAME + id + EXTENSION);
+            return new File(REPOSITORY + existingPath);
+        } else return null;
     }
 
     /**
