@@ -20,7 +20,7 @@ import springfox.documentation.spring.web.plugins.Docket;
 @Configuration
 public class SwaggerConfiguration {
 
-    private ApiInfo apiInfo(){
+    private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("Chartographer Application")
                 .description("Тестовое задание для стажировке в Контуре by Egor Mitrofanov")
@@ -39,6 +39,5 @@ public class SwaggerConfiguration {
                 .enable(true)
                 .apiInfo(apiInfo())
                 .useDefaultResponseMessages(false);
-
     }
 }

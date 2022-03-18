@@ -8,7 +8,7 @@ package com.example.charta.common;
 public interface Endpoints {
 
     /**
-     *  Эндпоинты взаимодействия с сервисом работы с изображениями
+     * Эндпоинты взаимодействия с сервисом работы с изображениями
      */
     String CHARTA = "/chartas";
     String CHARTA_WITH_ID = "/chartas/{chartId}";

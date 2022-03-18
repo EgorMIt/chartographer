@@ -10,8 +10,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author Egor Mitrofanov
  */
 @Data
-@ConfigurationProperties(prefix = "restrictions")
-public class GlobalRestrictions {
+@ConfigurationProperties(prefix = "global")
+public class GlobalVariable {
 
     @Value("@{imageWidthMax}")
     private String imageWidthMax;
@@ -25,5 +25,14 @@ public class GlobalRestrictions {
     @Value("@{fragmentHeightMax}")
     private String fragmentHeightMax;
 
+    @Value("@{storagePath}")
+    private String storagePath;
 
+    @Value("@{defaultName}")
+    private String defaultName;
+
+    @Value("@{extension}")
+    private String extension;
+
+    public static String path = "images/";
 }

@@ -2,7 +2,7 @@ package com.example.charta.web;
 
 import com.example.charta.common.Endpoints;
 import com.example.charta.model.FragmentDto;
-import com.example.charta.service.impl.ChartaServiceImpl;
+import com.example.charta.service.ChartaService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 /**
  * Контроллер запросов приложения
@@ -24,9 +25,9 @@ import java.awt.image.BufferedImage;
 public class ChartaController {
 
     /**
-     * {@link ChartaServiceImpl}.
+     * {@link ChartaService}.
      */
-    private final ChartaServiceImpl chartaServiceImpl;
+    private final ChartaService chartaService;
 
     /**
      * Создание нового пустого изображения
@@ -41,8 +42,8 @@ public class ChartaController {
             @ApiImplicitParam(name = "height", value = "Высота изображения", required = true, dataType = "Integer")
     })
     @PostMapping(value = Endpoints.CHARTA)
-    public ResponseEntity<Integer> createNewImage(@RequestParam("width") int width, @RequestParam("height") int height) {
-        return new ResponseEntity<>(chartaServiceImpl.createNewImage(width, height).getId(), HttpStatus.CREATED);
+    public ResponseEntity<Integer> createNewImage(@RequestParam("width") int width, @RequestParam("height") int height) throws IOException {
+        return new ResponseEntity<>(chartaService.createNewImage(width, height).getId(), HttpStatus.CREATED);
     }
 
     /**
@@ -69,8 +70,8 @@ public class ChartaController {
     public ResponseEntity<Object> insertFragment(@PathVariable int chartId, @RequestParam("x") int x,
                                                  @RequestParam("y") int y, @RequestParam("width") int width,
                                                  @RequestParam("height") int height,
-                                                 @RequestParam("file") MultipartFile multipartFile) {
-        chartaServiceImpl.insertFragment(chartId, new FragmentDto(multipartFile, width, height, x, y));
+                                                 @RequestParam("file") MultipartFile multipartFile) throws IOException {
+        chartaService.insertFragment(chartId, new FragmentDto(multipartFile, width, height, x, y));
         return ResponseEntity.ok().build();
     }
 
@@ -97,7 +98,7 @@ public class ChartaController {
                                                      @RequestParam("y") int y, @RequestParam("width") int width,
                                                      @RequestParam("height") int height) {
 
-        return new ResponseEntity<>(chartaServiceImpl.getFragment(chartId,
+        return new ResponseEntity<>(chartaService.getFragment(chartId,
                 new FragmentDto(width, height, x, y)), HttpStatus.OK);
     }
 
@@ -112,7 +113,7 @@ public class ChartaController {
     @DeleteMapping(value = Endpoints.CHARTA_WITH_ID)
     public ResponseEntity<Object> deleteImageByID(@PathVariable int chartId) {
 
-        chartaServiceImpl.deleteImageByID(chartId);
+        chartaService.deleteImageByID(chartId);
         return ResponseEntity.ok().build();
     }
 }

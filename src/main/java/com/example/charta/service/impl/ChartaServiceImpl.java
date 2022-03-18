@@ -6,14 +6,14 @@ import com.example.charta.model.FragmentDto;
 import com.example.charta.model.ImageDto;
 import com.example.charta.service.ChartaService;
 import com.example.charta.utils.FileUtils;
-import com.example.charta.utils.GlobalRestrictions;
+import com.example.charta.utils.GlobalVariable;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 
 /**
  * Логика сервиса работы с изображениями
@@ -21,19 +21,14 @@ import java.awt.image.BufferedImage;
  * @author Egor Mitrofanov
  */
 @Service
-@Slf4j
 @ConfigurationPropertiesScan("com.example.charta.utils")
 @RequiredArgsConstructor
 public class ChartaServiceImpl implements ChartaService {
 
-    /**
-     * {@link FileUtils}.
-     */
-    private static final FileUtils fu = new FileUtils();
     private static int idCount = 1;
     private static final String DEFAULT_NAME = "Image";
 
-    private final GlobalRestrictions globalRestrictions;
+    private final GlobalVariable globalVariable;
 
     /**
      * Создание нового пустого изображения
@@ -45,15 +40,15 @@ public class ChartaServiceImpl implements ChartaService {
      */
     @Override
     public ImageDto createNewImage(int width, int height) {
-        if (width <= Integer.parseInt(globalRestrictions.getImageWidthMax())
-                && height <= Integer.parseInt(globalRestrictions.getImageHeightMax())) {
+        if (width <= Integer.parseInt(globalVariable.getImageWidthMax())
+                && height <= Integer.parseInt(globalVariable.getImageHeightMax())) {
             BufferedImage newBufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
 
             Graphics2D g2d = (Graphics2D) newBufferedImage.getGraphics();
             g2d.setBackground(Color.BLACK);
             g2d.dispose();
 
-            while (fu.checkImageInStorage(idCount)) {
+            while (FileUtils.checkImageInStorage(idCount)) {
                 idCount++;
             }
 
@@ -61,7 +56,7 @@ public class ChartaServiceImpl implements ChartaService {
             ImageDto newImage = new ImageDto(idCount, fileName, width, height);
             idCount++;
 
-            fu.saveImage(newBufferedImage, fileName);
+            FileUtils.saveImage(newBufferedImage, fileName);
 
             return newImage;
         } else {
@@ -80,17 +75,19 @@ public class ChartaServiceImpl implements ChartaService {
      */
     @Override
     public BufferedImage getFragment(int id, FragmentDto fDto) {
-        if (fu.checkImageInStorage(id)) {
+        if (FileUtils.checkImageInStorage(id)) {
             /*
              * Проверка на размер фрагмента
              */
-            if (fDto.getWidth() <= 5000 && fDto.getHeight() <= 5000) {
-                BufferedImage currentImage = fu.getBufferedImage(id);
+            if (fDto.getWidth() <= Integer.parseInt(globalVariable.getFragmentWidthMax())
+                    && fDto.getHeight() <= Integer.parseInt(globalVariable.getFragmentHeightMax())) {
+                BufferedImage currentImage = FileUtils.getBufferedImage(id);
                 BufferedImage fragment;
 
                 /*
                  * Проверка на то, входит ли часть изображения во фрагмент
                  */
+                assert currentImage != null;
                 if (fDto.getStartX() < currentImage.getWidth() && fDto.getStartY() < currentImage.getHeight()
                         && (fDto.getStartX() + fDto.getWidth() > 0) && (fDto.getStartY() + fDto.getHeight() > 0)) {
                     /*
@@ -99,7 +96,7 @@ public class ChartaServiceImpl implements ChartaService {
                     if (fDto.getStartX() < 0 && fDto.getStartY() < 0 && fDto.getStartX() + fDto.getWidth() > currentImage.getWidth()
                             && fDto.getStartY() + fDto.getHeight() > currentImage.getHeight()) {
                         String fileName = "tmpGetFragment";
-                        fu.saveImage(currentImage, fileName);
+                        FileUtils.saveImage(currentImage, fileName);
                         return currentImage;
                     } else {
                         /*
@@ -196,7 +193,7 @@ public class ChartaServiceImpl implements ChartaService {
                                     fDto.getStartY(), fDto.getWidth(), fDto.getHeight());
                         }
                         String fileName = "tmpGetFragment";
-                        fu.saveImage(fragment, fileName);
+                        FileUtils.saveImage(fragment, fileName);
 
                         return fragment;
                     }
@@ -213,9 +210,13 @@ public class ChartaServiceImpl implements ChartaService {
      */
     @Override
     public void deleteImageByID(int id) {
-        if (fu.checkImageInStorage(id)) {
-            if (fu.getImageByID(id).delete()) idCount = id;
-        } else throw new NotFoundException("Image с таким ID не найден");
+        if (FileUtils.checkImageInStorage(id)) {
+            if (FileUtils.getImageByID(id).delete()) {
+                idCount = id;
+            }
+        } else {
+            throw new NotFoundException("Image с таким ID не найден");
+        }
     }
 
     /**
@@ -228,22 +229,24 @@ public class ChartaServiceImpl implements ChartaService {
      */
     @Override
     public void insertFragment(int id, FragmentDto fDto) {
-        if (fu.checkImageInStorage(id)) {
-            if (fDto.getWidth() <= 2000 && fDto.getHeight() <= 5000) {
+        if (FileUtils.checkImageInStorage(id)) {
+            if (fDto.getWidth() <= Integer.parseInt(globalVariable.getFragmentWidthMax())
+                    && fDto.getHeight() <= Integer.parseInt(globalVariable.getFragmentHeightMax())) {
                 if (!fDto.getMultipartFile().isEmpty()) {
-                    BufferedImage currentImage = fu.getBufferedImage(id);
+                    BufferedImage currentImage = FileUtils.getBufferedImage(id);
 
+                    assert currentImage != null;
                     if (fDto.getStartX() < currentImage.getWidth()
                             && fDto.getStartY() < currentImage.getHeight()) {
                         String tmpFileName = "tmpFragment";
                         String fileName = DEFAULT_NAME + id;
 
-                        BufferedImage fragment = fu.saveFragment(fDto.getMultipartFile(), tmpFileName);
+                        BufferedImage fragment = FileUtils.saveFragment(fDto.getMultipartFile(), tmpFileName);
 
                         Graphics2D g2d = (Graphics2D) currentImage.getGraphics();
                         g2d.drawImage(fragment, fDto.getStartX(), fDto.getStartY(), null);
 
-                        fu.saveImage(currentImage, fileName);
+                        FileUtils.saveImage(currentImage, fileName);
                     } else throw new BadRequestException("Некорректные данные: Фрагмент за пределами изображения");
                 } else throw new BadRequestException("Некорректные данные: Отсутствует тело запроса");
             } else throw new BadRequestException("Некорректные данные: Размер изображения превышает ограничения");

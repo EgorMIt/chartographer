@@ -41,7 +41,7 @@ public interface ChartaService {
     /**
      * Получение фрагмента изображения
      *
-     * @param id ID изображения
+     * @param id          ID изображения
      * @param fragmentDto FragmentDto фрагмента
      * @return BufferedImage полученного фрагмента
      */

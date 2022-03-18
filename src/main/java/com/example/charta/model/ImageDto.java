@@ -19,5 +19,4 @@ public class ImageDto extends Params {
         this.id = id;
         this.fileName = fileName;
     }
-
 }

@@ -1,11 +1,14 @@
 package com.example.charta.utils;
 
+import com.example.charta.errors.NotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URI;
+import java.util.Objects;
 
 /**
  * Логика работы с сохраненим и чтением файлов
@@ -15,7 +18,6 @@ import java.net.URI;
 public class FileUtils {
 
     private static final String EXTENSION = ".bmp";
-    private static final String REPOSITORY = "images/";
     private static final String DEFAULT_NAME = "Image";
 
     /**
@@ -24,11 +26,13 @@ public class FileUtils {
      * @param id ID изображения
      * @return file нового изображения
      */
-    public File getImageByID(int id) {
+    public static File getImageByID(int id) {
         if (checkImageInStorage(id)) {
             URI existingPath = URI.create(DEFAULT_NAME + id + EXTENSION);
-            return new File(REPOSITORY + existingPath);
-        } else return null;
+            return new File(GlobalVariable.path + existingPath);
+        } else {
+            throw new NotFoundException("Image с таким ID не найден");
+        }
     }
 
     /**
@@ -37,9 +41,9 @@ public class FileUtils {
      * @param bufferedImage BufferedImage изображения
      * @param fileName      имя файла
      */
-    public void saveImage(BufferedImage bufferedImage, String fileName) {
+    public static void saveImage(BufferedImage bufferedImage, String fileName) {
         try {
-            ImageIO.write(bufferedImage, "bmp", new File(REPOSITORY + fileName + EXTENSION));
+            ImageIO.write(bufferedImage, "bmp", new File(GlobalVariable.path + fileName + EXTENSION));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,9 +56,9 @@ public class FileUtils {
      * @param fileName      имя файла
      * @return BufferedImage  фрагмента
      */
-    public BufferedImage saveFragment(MultipartFile multipartFile, String fileName) {
+    public static BufferedImage saveFragment(MultipartFile multipartFile, String fileName) {
         try {
-            File tmpFile = new File(REPOSITORY + fileName + EXTENSION);
+            File tmpFile = new File(GlobalVariable.path + fileName + EXTENSION);
             BufferedOutputStream stream =
                     new BufferedOutputStream(new FileOutputStream(tmpFile));
             stream.write(multipartFile.getBytes());
@@ -73,10 +77,10 @@ public class FileUtils {
      * @param id ID изображения
      * @return boolean существует ли изображение
      */
-    public boolean checkImageInStorage(int id) {
+    public static boolean checkImageInStorage(int id) {
         try {
             URI existingPath = URI.create(DEFAULT_NAME + id + EXTENSION);
-            ImageIO.read(new File(REPOSITORY + existingPath));
+            ImageIO.read(new File(GlobalVariable.path + existingPath));
             return true;
         } catch (IOException e) {
             return false;
@@ -89,7 +93,7 @@ public class FileUtils {
      * @param id ID изображения
      * @return BufferedImage изображения
      */
-    public BufferedImage getBufferedImage(int id) {
+    public static BufferedImage getBufferedImage(int id) {
         try {
             return ImageIO.read(getImageByID(id));
         } catch (IOException e) {
