@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 
 /**
  * Логика сервиса работы с изображениями
@@ -93,11 +92,14 @@ public class ChartaServiceImpl implements ChartaService {
                     /*
                      * Обработка фрагмента, включающего изображение целиком
                      */
-                    if (fDto.getStartX() < 0 && fDto.getStartY() < 0 && fDto.getStartX() + fDto.getWidth() > currentImage.getWidth()
-                            && fDto.getStartY() + fDto.getHeight() > currentImage.getHeight()) {
+                    if (fDto.getStartX() <= 0 && fDto.getStartY() <= 0 && fDto.getStartX() + fDto.getWidth() >= currentImage.getWidth()
+                            && fDto.getStartY() + fDto.getHeight() >= currentImage.getHeight()) {
+                        fragment = new BufferedImage(fDto.getWidth(), fDto.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
+                        Graphics2D g2d = (Graphics2D) fragment.getGraphics();
+                        g2d.drawImage(currentImage, Math.abs(fDto.getStartX()), Math.abs(fDto.getStartY()), null);
+
                         String fileName = "tmpGetFragment";
-                        FileUtils.saveImage(currentImage, fileName);
-                        return currentImage;
+                        FileUtils.saveImage(fragment, fileName);
                     } else {
                         /*
                          * Обработка фрагмента, захватывающего только правую или верхнюю сторону
@@ -194,9 +196,8 @@ public class ChartaServiceImpl implements ChartaService {
                         }
                         String fileName = "tmpGetFragment";
                         FileUtils.saveImage(fragment, fileName);
-
-                        return fragment;
                     }
+                    return fragment;
                 } else throw new BadRequestException("Некорректные данные: Фрагмент за пределами изображения");
             } else throw new BadRequestException("Некорректные данные: Размер изображения превышает ограничения");
         } else throw new NotFoundException("Image с таким ID не найден");

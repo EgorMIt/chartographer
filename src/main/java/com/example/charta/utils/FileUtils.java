@@ -94,11 +94,15 @@ public class FileUtils {
      * @return BufferedImage изображения
      */
     public static BufferedImage getBufferedImage(int id) {
-        try {
-            return ImageIO.read(getImageByID(id));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+        if (checkImageInStorage(id)) {
+            try {
+                return ImageIO.read(getImageByID(id));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            throw new NotFoundException("Image с таким ID не найден");
         }
+        return null;
     }
 }
